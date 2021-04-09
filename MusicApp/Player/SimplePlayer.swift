@@ -41,7 +41,7 @@ class SimplePlayer {
         player.seek(to: time)
     }
     
-    func replaceCurrentItem(with item: AVPlayerItem) {
+    func replaceCurrentItem(with item: AVPlayerItem?) {
         player.replaceCurrentItem(with: item)
     }
     

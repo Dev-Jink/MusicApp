@@ -29,6 +29,12 @@ class PlayerViewController: UIViewController {
         
         updatePlayButton()
         updateTime(time: .zero)
+        //TimeObserver 구현
+        timeObserver = simplePlayer.addPeriodicTimeObserver(forInterval: CMTime(seconds: 1, preferredTimescale: 10),
+                                                            queue: DispatchQueue.main,
+                                                            using: { (time) in
+                                                                self.updateTime(time: time)
+                                                            })
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -40,6 +46,8 @@ class PlayerViewController: UIViewController {
     
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
+        simplePlayer.pause()
+        simplePlayer.replaceCurrentItem(with: nil )
     }
     
     @IBAction func beginDrag(_ sender: UISlider){
@@ -52,6 +60,12 @@ class PlayerViewController: UIViewController {
     
     @IBAction func seek(_ sender: UISlider){
         // TODO: seek
+        guard let currentItem = simplePlayer.currentItem else { return }
+            
+        let position = Double(sender.value)
+        let seconds = position * currentItem.duration.seconds
+        let time = CMTime(seconds: seconds, preferredTimescale: 100)
+        simplePlayer.seek(to: time)
     }
     
     @IBAction func togglePlayButton(_ sender: UIButton){
@@ -82,11 +96,13 @@ extension PlayerViewController {
         // CurrentTime Label, totalDuraion Label, Slider
         
         //update TimeInfo
-        currentTimeLabel.text = secondToString(sec: 0.0)
-        totalDurationLabel.text = secondToString(sec: 0.0)
+        currentTimeLabel.text = secondToString(sec: simplePlayer.currentTime)
+        totalDurationLabel.text = secondToString(sec: simplePlayer.totalDurationTime)
         
         if isSeeking == false {
             // seeking false 일떄 슬라이더 업데이트
+            timeSlider.value = Float( simplePlayer.currentTime / simplePlayer.totalDurationTime )
+            
         }
     }
     
